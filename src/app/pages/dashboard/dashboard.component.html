@@ -1,0 +1,93 @@
+<app-nav-menu (sectionSelected)="loadContent($event)" class="fixed top-0 left-0"></app-nav-menu>
+
+<header class="fixed top-0 left-64 right-0 bg-white shadow-sm flex items-center h-16 border-b border-gray-100 z-50">
+    <div class="container mx-auto flex justify-between items-center px-6">
+      <!-- Logo et Nom du Restaurant -->
+      <div class="flex items-center space-x-3">
+        <span class="text-xl font-semibold text-gray-800">Management</span>
+      </div>
+  
+      <!-- Informations Utilisateur et Déconnexion -->
+      <div class="flex items-center space-x-4">
+        <span class="text-gray-600">Bienvenue, NomUtilisateur</span>
+        <button class="bg-red-400 text-white px-4 py-2 rounded-lg hover:bg-red-500 transition duration-300">
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="ml-64 mt-16 p-6 overflow-y-auto h-[calc(100vh-4rem)]">
+    <ng-container *ngIf="currentComponent === 'dashboard'">
+      <h1 class="text-2xl font-bold mb-6 text-gray-800">Tableau de Bord</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Investi -->
+        <div class="p-6 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-blue-500">trending_up</span>
+            <h2 class="text-lg font-semibold text-gray-700">Total Investi</h2>
+          </div>
+          <p class="text-2xl font-bold text-gray-800 mt-2">{{ totalInvested }} FC</p>
+        </div>
+  
+        <!-- Ventes VIP -->
+        <div class="p-6 bg-green-50 rounded-lg shadow-sm border border-green-100">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-green-500">star</span>
+            <h2 class="text-lg font-semibold text-gray-700">Ventes VIP</h2>
+          </div>
+          <p class="text-2xl font-bold text-gray-800 mt-2">{{ totalSalesVIP }} FC</p>
+        </div>
+  
+        <!-- Ventes Terrasse -->
+        <div class="p-6 bg-purple-50 rounded-lg shadow-sm border border-purple-100">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-purple-500">local_cafe</span>
+            <h2 class="text-lg font-semibold text-gray-700">Ventes Terrasse</h2>
+          </div>
+          <p class="text-2xl font-bold text-gray-800 mt-2">{{ totalSalesTerrace }} FC</p>
+        </div>
+  
+        <!-- Points Accumulés -->
+        <div class="p-6 bg-yellow-50 rounded-lg shadow-sm border border-yellow-100">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-yellow-500">loyalty</span>
+            <h2 class="text-lg font-semibold text-gray-700">Points Accumulés</h2>
+          </div>
+          <p class="text-2xl font-bold text-gray-800 mt-2">{{ totalPoints }}</p>
+        </div>
+  
+        <!-- Dépenses Totales -->
+        <div class="p-6 bg-red-50 rounded-lg shadow-sm border border-red-100">
+          <div class="flex items-center space-x-3">
+            <span class="material-icons text-red-500">money_off</span>
+            <h2 class="text-lg font-semibold text-gray-700">Dépenses Totales</h2>
+          </div>
+          <p class="text-2xl font-bold text-gray-800 mt-2">{{ totalExpenses }} FC</p>
+        </div>
+      </div>
+    </ng-container>
+  
+    <!-- Contenu dynamique pour les autres sections -->
+    <ng-container *ngIf="currentComponent === 'stock'">
+      <app-stock></app-stock>
+    </ng-container>
+    <ng-container *ngIf="currentComponent === 'list-stock'">
+        <app-list-produit></app-list-produit>
+      </ng-container>
+    <ng-container *ngIf="currentComponent === 'clients'">
+      <app-customers></app-customers>
+    </ng-container>
+    <ng-container *ngIf="currentComponent === 'sales'">
+      <app-sales></app-sales>
+    </ng-container>
+    <ng-container *ngIf="currentComponent === 'purchases'">
+      <app-purchases></app-purchases>
+    </ng-container>
+    <ng-container *ngIf="currentComponent === 'expenses'">
+      <app-expenses></app-expenses>
+    </ng-container>
+    <ng-container *ngIf="currentComponent === 'addselected'">
+        <app-add-option></app-add-option>
+    </ng-container>
+  </main>

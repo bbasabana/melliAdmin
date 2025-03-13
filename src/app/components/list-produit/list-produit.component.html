@@ -1,0 +1,211 @@
+<div class="container mx-auto p-4">
+    <!-- Mini Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-blue-100 p-4 rounded shadow">
+            <h3 class="font-semibold text-gray-700">Total Produits</h3>
+            <p class="text-2xl font-bold text-blue-600">{{ totalProducts }}</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded shadow">
+            <h3 class="font-semibold text-gray-700">Marge VIP Totale</h3>
+            <p class="text-2xl font-bold text-green-600">{{ totalVipMargin | number:'1.2-2' }}</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded shadow">
+            <h3 class="font-semibold text-gray-700">Marge Terrasse Totale</h3>
+            <p class="text-2xl font-bold text-yellow-600">{{ totalTerraceMargin | number:'1.2-2' }}</p>
+        </div>
+        <div class="bg-red-100 p-4 rounded shadow">
+            <h3 class="font-semibold text-gray-700">Bouteilles Sucrées Totales</h3>
+            <p class="text-2xl font-bold text-red-600">{{ totalBottlesSucree > 0 ? totalBottlesSucree : 0 }}</p>
+        </div>
+        <div class="bg-purple-100 p-4 rounded shadow">
+            <h3 class="font-semibold text-gray-700">Bouteilles Bière Totales</h3>
+            <p class="text-2xl font-bold text-purple-600">{{ totalBottlesBiere > 0 ? totalBottlesBiere : 0 }}</p>
+        </div>
+    </div>
+    <!-- Filters -->
+    <div class="mb-4 flex space-x-4">
+        <input
+            type="text"
+            placeholder="Rechercher par nom..."
+            class="p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300 w-1/4"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchTermChange()"
+        />
+        <select
+            class="p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300 w-1/5"
+            [(ngModel)]="productTypeFilter"
+            (change)="onProductTypeFilterChange()"
+        >
+            <option value="">Tous les types</option>
+            <option value="Boisson">Boisson</option>
+            <option value="Nourriture">Nourriture</option>
+        </select>
+    </div>
+    <!-- Product Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 shadow-md rounded">
+            <thead>
+            <tr class="bg-gray-50">
+                <th class="py-2 px-3 border-b font-semibold text-left">Produit</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Type</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Prix VIP</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Prix Terrasse</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Stock</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Marge VIP</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Marge Terrasse</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Créer</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Dernière Modification</th>
+                <th class="py-2 px-3 border-b font-semibold text-left">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let product of pagedProducts" class="hover:bg-gray-100"
+                [ngClass]="{'bg-orange-100': stockAlerts[product.id]}">
+                <td class="py-2 px-3 border-b">{{ product.name }}</td>
+                <td class="py-2 px-3 border-b">{{ product.type }}</td>
+                <td class="py-2 px-3 border-b">{{ product.vipPrice | number:'1.2-2' }}</td>
+                <td class="py-2 px-3 border-b">{{ product.terracePrice | number:'1.2-2' }}</td>
+                <td class="py-2 px-3 border-b">{{ getProductStockLevel(product) }}</td>
+                <td class="py-2 px-3 border-b">{{ product.marginVIP | number:'1.2-2' }}</td>
+                <td class="py-2 px-3 border-b">{{ product.marginTerrace | number:'1.2-2' }}</td>
+                <td class="py-2 px-3 border-b">{{ product.createdAt ? formatDate(product.createdAt) : 'Aucune' }}</td>
+                <td class="py-2 px-3 border-b">{{ product.lastModified ? formatDate(product.lastModified) : 'N/A' }}</td>
+                <td class="py-2 px-3 border-b">
+                    <div class="flex space-x-2">
+                        <button (click)="openEditModal(product)"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">
+                            Modifier
+                        </button>
+                        <button (click)="openDeleteModal(product.id)"
+                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs">
+                            Supprimer
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr *ngIf="isLoading">
+                <td colspan="9" class="text-center py-4">Chargement des produits...</td>
+            </tr>
+            <tr *ngIf="!isLoading && products.length === 0">
+                <td colspan="9" class="text-center py-4">Aucun produit trouvé.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Pagination -->
+    <div class="flex justify-center mt-4" *ngIf="totalPages > 1">
+        <button (click)="goToPage(1)" [disabled]="currentPage === 1"
+                class="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-l">
+            Première
+        </button>
+        <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+                class="py-2 px-4 bg-gray-200 hover:bg-gray-300">
+            Précédente
+        </button>
+        <ng-container *ngFor="let pageNumber of pageNumbers">
+            <button (click)="goToPage(pageNumber)" class="py-2 px-4" [ngClass]="{
+                'bg-blue-500 text-white': currentPage === pageNumber,
+                'bg-gray-200 hover:bg-gray-300': currentPage !== pageNumber
+            }">
+                {{ pageNumber }}
+            </button>
+        </ng-container>
+        <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                class="py-2 px-4 bg-gray-200 hover:bg-gray-300">
+            Suivante
+        </button>
+        <button (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages"
+                class="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-r">
+            Dernière
+        </button>
+    </div>
+    <!-- Edit Product Modal -->
+    <div *ngIf="isEditModalOpen" class="fixed top-0 left-0 w-full h-full flex items-center justify-center"
+         style="background-color: rgba(0,0,0,0.5);">
+        <div class="bg-white rounded shadow-lg p-8 max-w-lg w-full">
+            <h2 class="text-2xl font-bold mb-4">Modifier le Produit</h2>
+            <div class="mb-4">
+                <label for="editName" class="block text-gray-700 font-medium mb-1">Nom:</label>
+                <input type="text" id="editName" [(ngModel)]="productToEdit!.name" class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300"/>
+            </div>
+            <div class="mb-4">
+                <label for="editType" class="block text-gray-700 font-medium mb-1">Type:</label>
+                <input type="text" id="editType" [(ngModel)]="productToEdit!.type" class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300"/>
+            </div>
+            <div class="grid grid-cols-2 gap-4" *ngIf="productToEdit!.type === 'Boisson'">
+                <div>
+                    <label for="editBottlesPerCase" class="block text-gray-700 font-medium mb-1">Bouteilles par Casier:</label>
+                    <input type="number" id="editBottlesPerCase" [(ngModel)]="productToEdit!.bottlesPerCase"
+                           class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300" (input)="calculateMargins(productToEdit!)"/>
+                </div>
+                <div>
+                    <label for="editNombreCasier" class="block text-gray-700 font-medium mb-1">Nombre de Casiers:</label>
+                    <input type="number" id="editNombreCasier" [(ngModel)]="productToEdit!.nombreCasier"
+                           class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300" (input)="calculateMargins(productToEdit!)"/>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4" *ngIf="productToEdit!.type === 'Nourriture'">
+                <div>
+                    <label for="editPlats" class="block text-gray-700 font-medium mb-1">Nombre de Plats:</label>
+                    <input type="number" id="editPlats" [(ngModel)]="productToEdit!.plats"
+                           class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300" (input)="calculateMargins(productToEdit!)"/>
+                </div>
+            </div>
+            <div class="mb-4" *ngIf="productToEdit!.type === 'Boisson' && productToEdit!.boissonType === 'Eau'">
+                <label for="editNombrePaquet" class="block text-gray-700 font-medium mb-1">Nombre de Paquets:</label>
+                <input type="number" id="editNombrePaquet" [(ngModel)]="productToEdit!.nombrePaquet"
+                       class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300" (input)="calculateMargins(productToEdit!)"/>
+            </div>
+ <div class="mb-4">
+                <label for="editPurchasePrice" class="block text-gray-700 font-medium mb-1">Prix d'Achat Total (FC) :</label>
+                <input
+                  type="number"
+                  id="editPurchasePrice"
+                  name="editPurchasePrice"
+                  [(ngModel)]="productToEdit!.purchasePrice"
+                  (input)="calculateMargins(productToEdit!)"
+                  required
+                  class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300"
+                />
+              </div>
+            <div class="mb-4">
+                <label for="editVipPrice" class="block text-gray-700 font-medium mb-1">Prix VIP:</label>
+                <input type="number" id="editVipPrice" [(ngModel)]="productToEdit!.vipPrice" class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300"
+                       (input)="calculateMargins(productToEdit!)"/>
+            </div>
+            <div class="mb-4">
+                <label for="editTerracePrice" class="block text-gray-700 font-medium mb-1">Prix Terrasse:</label>
+                <input type="number" id="editTerracePrice" [(ngModel)]="productToEdit!.terracePrice"
+                       class="w-full p-2 border border-gray-700 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-300" (input)="calculateMargins(productToEdit!)"/>
+            </div>
+            <div class="flex justify-end">
+                <button (click)="closeEditModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                    Annuler
+                </button>
+                <button (click)="saveProduct()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        [disabled]="isLoading">
+                    <span *ngIf="!isLoading">Enregistrer</span>
+                    <span *ngIf="isLoading">Enregistrement...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Confirmation Modal -->
+    <div *ngIf="isDeleteModalOpen" class="fixed top-0 left-0 w-full h-full flex items-center justify-center"
+         style="background-color: rgba(0,0,0,0.5);">
+        <div class="bg-white rounded shadow-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Supprimer le Produit</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce produit?</p>
+            <div class="flex justify-end mt-4">
+                <button (click)="closeDeleteModal()"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">Annuler
+                </button>
+                <button (click)="deleteProduct()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                        [disabled]="isLoading">
+                    <span *ngIf="!isLoading">Supprimer</span>
+                    <span *ngIf="isLoading">Suppression...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

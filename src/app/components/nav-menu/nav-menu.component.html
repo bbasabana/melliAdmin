@@ -1,0 +1,88 @@
+<nav class="w-64 bg-white text-gray-800 fixed h-screen overflow-y-auto shadow-lg">
+  <!-- Logo sans fond bleu -->
+  <div class="flex items-center justify-center h-20">
+    <img src="/images/logo.png" alt="Logo" class="h-12" />
+  </div>
+  <ul class="space-y-2 p-4">
+    <li>
+      <a
+        [class.active]="activeSection === 'dashboard'"
+        (click)="onSelect('dashboard')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">home</span>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a
+        [class.active]="activeSection === 'stock'"
+        (click)="onSelect('stock')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">inventory</span>
+        <span>Stocks</span>
+      </a>
+    </li>
+    <li>
+      <a
+        [class.active]="activeSection === 'list-stock'"
+        (click)="onSelect('list-stock')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">view_list</span>
+        <span>Liste produits</span>
+      </a>
+    </li>
+    <li>
+      <a
+        [class.active]="activeSection === 'clients'"
+        (click)="onSelect('clients')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">people</span>
+        <span>Clients</span>
+      </a>
+    </li>
+    <li>
+      <a
+        [class.active]="activeSection === 'sales'"
+        (click)="onSelect('sales')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">receipt</span>
+        <span>Ventes</span>
+      </a>
+    </li>
+    <li>
+      <a
+        [class.active]="activeSection === 'purchases'"
+        (click)="onSelect('purchases')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">shopping_cart</span>
+        <span>Achats</span>
+      </a>
+    </li> 
+    <li>
+      <a
+        [class.active]="activeSection === 'expenses'"
+        (click)="onSelect('expenses')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">payments</span>
+        <span>Dépenses</span>
+      </a>
+    </li>
+    <li>
+      <a
+        [class.active]="activeSection === 'addselected'"
+        (click)="onSelect('addselected')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">add</span>
+        <span>Ajout Selector</span>
+      </a>
+    </li>
+  </ul>
+</nav>
