@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, AbstractControl  } from '@angular/forms';
 import { Product } from '../../models/product.model';
@@ -10,6 +10,7 @@ import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-stock',
+  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './stock.component.html',
   styleUrl: './stock.component.scss'

@@ -13,21 +13,6 @@ export class ManagementService {
   private firestore = inject(Firestore); // Injecter Firestore avec `inject`
   private injector = inject(Injector); // Injecter l'Injector
 
-  // **Produits**
-  // async addProduct(id: string, product: Product) {
-  //   return runInInjectionContext(this.injector, async () => {
-  //     try {
-  //       const productCollection = collection(this.firestore, 'products'); // Référence à la collection 'products'
-  //       const productRef = await addDoc(productCollection, product); // Ajouter un document avec un ID auto-généré
-  //       console.log('Produit ajouté avec succès, ID :', productRef.id); // Log l'ID du document
-  //       return productRef.id; // Retourner l'ID du document
-  //     } catch (error) {
-  //       console.error('Erreur lors de l\'ajout du produit :', error); // Log en cas d'erreur
-  //       throw error; // Propager l'erreur
-  //     }
-  //   });
-  // }
-
   async addProduct(id: string, product: Product) {
     return runInInjectionContext(this.injector, async () => {
       try {

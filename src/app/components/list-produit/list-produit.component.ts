@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { ManagementService } from '../../services/management.service';
 import { Product } from '../../models/product.model';
 import { NotifictionService } from '../../services/notification/notifiction.service';
@@ -13,7 +14,9 @@ import { Timestamp } from 'firebase/firestore';
   templateUrl: './list-produit.component.html',
   styleUrl: './list-produit.component.scss'
 })
-export class ListProduitComponent {
+export class ListProduitComponent implements OnInit, OnDestroy {
+private ngUnsubscribe = new Subject<void>();
+
   products: Product[] = [];
     filteredProducts: Product[] = [];
     totalProducts: number = 0;
@@ -34,7 +37,8 @@ export class ListProduitComponent {
     initialProductsLength: number = 0; // Store the initial length of the product list
 
     constructor(private managementService: ManagementService,
-                private notificationService: NotifictionService
+                private notificationService: NotifictionService,
+                private cdr: ChangeDetectorRef
     ) {
     }
 
@@ -42,22 +46,52 @@ export class ListProduitComponent {
         this.loadProducts();
     }
 
+    ngOnDestroy(): void {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
+    }
+
+    // async loadProducts() {
+    //     this.isLoading = true;
+    //     try {
+    //         this.products = await this.managementService.getProducts();
+    //         this.initialProductsLength = this.products.length; // Store the initial length
+    //         this.products.forEach(product => {
+    //          if (product.lastModified) {
+    //                 if (typeof product.lastModified === 'string') {
+    //                     product.lastModified = this.formatDate(product.lastModified);
+    //                 }
+    //              if (typeof product.createdAt === 'string') {
+    //                     product.createdAt = this.formatDate(product.createdAt);
+    //                 }
+    //             }
+
+    //         });
+    //         this.filterProducts();
+    //         this.calculateTotals();
+    //         this.checkStockAlerts();
+    //     } catch (error) {
+    //         this.notificationService.showError('Impossible de charger les produits.');
+    //         console.error(error);
+    //     } finally {
+    //         this.isLoading = false;
+    //     }
+    // }
+
     async loadProducts() {
         this.isLoading = true;
         try {
-            this.products = await this.managementService.getProducts();
-            this.initialProductsLength = this.products.length; // Store the initial length
-            this.products.forEach(product => {
-             if (product.lastModified) {
-                    if (typeof product.lastModified === 'string') {
-                        product.lastModified = this.formatDate(product.lastModified);
-                    }
-                 if (typeof product.createdAt === 'string') {
-                        product.createdAt = this.formatDate(product.createdAt);
-                    }
+            const products = await this.managementService.getProducts();
+            this.products = products.map(product => {
+                if (product.lastModified && typeof product.lastModified === 'string') {
+                    product.lastModified = this.formatDate(product.lastModified);
                 }
-
+                if (product.createdAt && typeof product.createdAt === 'string') {
+                    product.createdAt = this.formatDate(product.createdAt);
+                }
+                return product;
             });
+            this.initialProductsLength = this.products.length;
             this.filterProducts();
             this.calculateTotals();
             this.checkStockAlerts();
@@ -270,6 +304,27 @@ export class ListProduitComponent {
         this.productToDeleteId = null;
     }
 
+    // async deleteProduct() {
+    //     if (!this.productToDeleteId) return;
+    //     this.isLoading = true;
+    //     try {
+    //         await this.managementService.deleteProduct(this.productToDeleteId);
+    //         this.notificationService.showSuccess('Produit supprimé avec succès!');
+    //         this.closeDeleteModal();
+    //         // After successful deletion, filter out the deleted product from the local arrays.
+    //         this.products = this.products.filter(product => product.id !== this.productToDeleteId);
+    //         this.filterProducts(); // Refresh the filtered list
+    //         this.calculateTotals(); // Recalculate totals
+    //         this.checkStockAlerts(); // Recheck alerts
+    //     } catch (error) {
+    //         this.notificationService.showError('Erreur lors de la suppression du produit.');
+    //         console.error(error);
+    //     } finally {
+    //         this.isLoading = false;
+    //     }
+    // }
+
+
     async deleteProduct() {
         if (!this.productToDeleteId) return;
         this.isLoading = true;
@@ -277,11 +332,28 @@ export class ListProduitComponent {
             await this.managementService.deleteProduct(this.productToDeleteId);
             this.notificationService.showSuccess('Produit supprimé avec succès!');
             this.closeDeleteModal();
-            // After successful deletion, filter out the deleted product from the local arrays.
+            
+            await this.loadProducts();
+            
+            // Forcer le rafraîchissement du template
+            this.cdr.detectChanges();
+            // 1. Mettre à jour le tableau products
             this.products = this.products.filter(product => product.id !== this.productToDeleteId);
-            this.filterProducts(); // Refresh the filtered list
-            this.calculateTotals(); // Recalculate totals
-            this.checkStockAlerts(); // Recheck alerts
+            
+            // 2. Rafraîchir la liste filtrée
+            this.filterProducts();
+            console.log('pagedProducts after filterProducts():', this.pagedProducts); // Add this line
+            
+            // 3. Recalculer les totaux
+            this.calculateTotals();
+            
+            // 4. Vérifier les alertes de stock
+            this.checkStockAlerts();
+            
+            // 5. Forcer la détection de changements
+            setTimeout(() => {
+                this.cdr.detectChanges();
+            }, 0);
         } catch (error) {
             this.notificationService.showError('Erreur lors de la suppression du produit.');
             console.error(error);
@@ -289,7 +361,6 @@ export class ListProduitComponent {
             this.isLoading = false;
         }
     }
-
     getProductStockLevel(product: Product): string {
       if (product.type === 'Boisson') {
           if (product.boissonType === 'Sucree' || product.boissonType === 'Biere' || product.boissonType === 'Vin' || product.boissonType === 'Eau' || product.boissonType === 'Whisky') {
