@@ -232,47 +232,93 @@ private ngUnsubscribe = new Subject<void>();
         this.productToEdit = null;
     }
 
+    // calculateMargins(product: Product) {
+    //   if (product.type === 'Boisson') {
+    //       let unitPrice = 0;
+  
+    //       if (product.boissonType === 'Eau' && product.purchasePrice) {
+    //           // Eau : Nombre de paquets * prix d'achat
+    //           unitPrice = product.purchasePrice;
+    //       } else if ((product.boissonType === 'Vin' || product.boissonType === 'Whisky' || product.boissonType === 'Biere' || product.boissonType === 'Sucree')
+    //           && product.bottlesPerCase && product.purchasePrice) {
+    //           // Autres boissons : Calcul basé sur le nombre de bouteilles par casier et le nombre de casiers
+    //           const totalBottles = (product.bottlesPerCase * (product.nombreCasier || 1)) || product.bottlesPerCase;
+    //           unitPrice = product.purchasePrice / totalBottles;
+    //           product.pricePerBottle = unitPrice;
+    //       }
+  
+    //       product.pricePerBottle = unitPrice;
+    //       product.profitVIP = product.vipPrice - unitPrice;
+    //       product.profitTerrace = product.terracePrice - unitPrice;
+    //       product.marginVIP = product.profitVIP;
+    //       product.marginTerrace = product.profitTerrace;
+  
+    //   } else if (product.type === 'Nourriture' && product.plats && product.purchasePrice) {
+    //       // Calcul pour la nourriture
+    //       product.pricePerPlat = product.purchasePrice / product.plats;
+  
+    //       product.marginPlatVIP = product.vipPrice - product.pricePerPlat;
+    //       product.marginPlatTerrace = product.terracePrice - product.pricePerPlat;
+  
+    //       product.marginVIP = product.marginPlatVIP;
+    //       product.marginTerrace = product.marginPlatTerrace;
+  
+    //       if (product.hasDemiPlat) {
+    //           const pricePerDemiPlat = product.pricePerPlat / 2;
+    //           product.marginPlatVIP = (product.vipPriceDemiPlat ?? 0) - pricePerDemiPlat;
+    //           product.marginPlatTerrace = (product.terracePriceDemiPlat ?? 0) - pricePerDemiPlat;
+    //       }
+    //   } else {
+    //       product.marginVIP = 0;
+    //       product.marginTerrace = 0;
+    //   }
+    // }
+    
+    // Calcul marge
+
     calculateMargins(product: Product) {
-      if (product.type === 'Boisson') {
-          let unitPrice = 0;
-  
-          if (product.boissonType === 'Eau' && product.purchasePrice) {
-              // Eau : Nombre de paquets * prix d'achat
-              unitPrice = product.purchasePrice;
-          } else if ((product.boissonType === 'Vin' || product.boissonType === 'Whisky' || product.boissonType === 'Biere' || product.boissonType === 'Sucree')
-              && product.bottlesPerCase && product.purchasePrice) {
-              // Autres boissons : Calcul basé sur le nombre de bouteilles par casier et le nombre de casiers
-              const totalBottles = (product.bottlesPerCase * (product.nombreCasier || 1)) || product.bottlesPerCase;
-              unitPrice = product.purchasePrice / totalBottles;
-              product.pricePerBottle = unitPrice;
-          }
-  
-          product.pricePerBottle = unitPrice;
-          product.profitVIP = product.vipPrice - unitPrice;
-          product.profitTerrace = product.terracePrice - unitPrice;
-          product.marginVIP = product.profitVIP;
-          product.marginTerrace = product.profitTerrace;
-  
-      } else if (product.type === 'Nourriture' && product.plats && product.purchasePrice) {
-          // Calcul pour la nourriture
-          product.pricePerPlat = product.purchasePrice / product.plats;
-  
-          product.marginPlatVIP = product.vipPrice - product.pricePerPlat;
-          product.marginPlatTerrace = product.terracePrice - product.pricePerPlat;
-  
-          product.marginVIP = product.marginPlatVIP;
-          product.marginTerrace = product.marginPlatTerrace;
-  
-          if (product.hasDemiPlat) {
-              const pricePerDemiPlat = product.pricePerPlat / 2;
-              product.marginPlatVIP = (product.vipPriceDemiPlat ?? 0) - pricePerDemiPlat;
-              product.marginPlatTerrace = (product.terracePriceDemiPlat ?? 0) - pricePerDemiPlat;
-          }
-      } else {
-          product.marginVIP = 0;
-          product.marginTerrace = 0;
-      }
-  }
+        if (product.type === 'Boisson') {
+            // Calcul pour les boissons
+            const nombreCasiers = product.nombreCasier;
+            const nombreBouteilles = product.bottlesPerCase * nombreCasiers;
+            
+            // Prix d'achat total (ne change pas avec le nombre de casiers)
+            const prixAchatTotal = product.purchasePrice;
+            
+            // Calcul des marges totales
+            product.marginVIP = (nombreBouteilles * product.vipPrice) - prixAchatTotal;
+            product.marginTerrace = (nombreBouteilles * product.terracePrice) - prixAchatTotal;
+            
+            // Pour référence (optionnel)
+            product.pricePerBottle = prixAchatTotal / nombreBouteilles;
+            product.profitVIP = product.vipPrice - product.pricePerBottle;
+            product.profitTerrace = product.terracePrice - product.pricePerBottle;
+    
+        } else if (product.type === 'Nourriture' && product.plats && product.purchasePrice) {
+            // Calcul pour la nourriture
+            const nombrePlats = product.plats;
+            const prixAchatTotal = product.purchasePrice;
+            
+            // Calcul des marges totales
+            product.marginVIP = (nombrePlats * product.vipPrice) - prixAchatTotal;
+            product.marginTerrace = (nombrePlats * product.terracePrice) - prixAchatTotal;
+            
+            // Pour référence (optionnel)
+            product.pricePerPlat = prixAchatTotal / nombrePlats;
+            product.marginPlatVIP = product.vipPrice - product.pricePerPlat;
+            product.marginPlatTerrace = product.terracePrice - product.pricePerPlat;
+    
+            if (product.hasDemiPlat) {
+                // Si demi-plat est activé, on double virtuellement le nombre de plats
+                const nombreDemiPlats = product.plats * 2;
+                product.marginVIP = (nombreDemiPlats * (product.vipPriceDemiPlat ?? 0)) - prixAchatTotal;
+                product.marginTerrace = (nombreDemiPlats * (product.terracePriceDemiPlat ?? 0)) - prixAchatTotal;
+            }
+        } else {
+            product.marginVIP = 0;
+            product.marginTerrace = 0;
+        }
+    }
 
     async saveProduct() {
         if (!this.productToEdit) return;
@@ -280,7 +326,7 @@ private ngUnsubscribe = new Subject<void>();
         try {
             //Update Margin beforesave
             this.calculateMargins(this.productToEdit);
-            this.productToEdit.lastModified = new Date(); // Update lastModified date
+            //this.productToEdit.lastModified = new Date(); // Update lastModified date
             await this.managementService.updateProduct(this.productToEdit.id, this.productToEdit);
             this.notificationService.showSuccess('Produit mis à jour avec succès!');
             this.closeEditModal();

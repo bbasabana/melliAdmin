@@ -50,34 +50,137 @@
                     </select>
                 </div>
 
-                <div *ngIf="showNombrePaquet" class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="nombrePaquet" class="block text-sm text-gray-700 mb-1">Nombre de Paquets</label>
-                        <input type="number" id="nombrePaquet" name="nombrePaquet" [(ngModel)]="product.nombrePaquet" (input)="calculateMargins()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
-                    </div>
-                    <div *ngIf="showNombreBouteillesEau">
-                        <label for="nombreBouteilles" class="block text-sm text-gray-700 mb-1">Nombre de Bouteilles</label>
-                        <input type="number" id="nombreBouteilles" name="nombreBouteilles" [(ngModel)]="product.nombreBouteilles" (input)="calculateMargins()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
-                    </div>
+                <!-- Message pour Vin/Whisky -->
+                <div *ngIf="product.boissonType === 'Vin' || product.boissonType === 'Whisky'" class="p-3 bg-yellow-50 text-yellow-800 rounded-lg">
+                    <p class="text-sm">Ce produit est vendu uniquement à l'unité</p>
                 </div>
 
-                <div *ngIf="showBottlesPerCase">
-                    <label for="bottlesPerCase" class="block text-sm text-gray-700 mb-1">Nombre de Bouteilles par Casier</label>
-                    <input type="number" id="bottlesPerCase" name="bottlesPerCase" [(ngModel)]="product.bottlesPerCase" (input)="calculateMargins()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                <!-- Type d'emballage (sauf pour Vin/Whisky) -->
+                <div *ngIf="product.boissonType !== 'Vin' && product.boissonType !== 'Whisky'">
+                    <label for="packageType" class="block text-sm text-gray-700 mb-1">Format d'achat</label>
+                    <select
+                        id="packageType"
+                        name="packageType"
+                        [(ngModel)]="product.packageType"
+                        (change)="onPackageTypeChange()"
+                        class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                    >
+                        <option value="casier">Casier</option>
+                        <option value="paquet">Paquet</option>
+                    </select>
                 </div>
 
-                <div *ngIf="showCaseFields" class="grid grid-cols-2 gap-4">
+                <!-- Taille du paquet (pour eau et sucrée) -->
+                <div *ngIf="showPackageSize" class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="caseType" class="block text-sm text-gray-700 mb-1">Type de Casier</label>
-                        <select id="caseType" name="caseType" [(ngModel)]="product.caseType" (change)="onBoissonTypeChange()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm">
-                            <option [ngValue]="undefined" disabled>Sélectionner un type</option>
-                            <option *ngFor="let option of typeCasierOptions" [value]="option.name">{{ option.name }}</option>
+                        <label for="packageSize" class="block text-sm text-gray-700 mb-1">Taille du paquet</label>
+                        <select
+                            id="packageSize"
+                            name="packageSize"
+                            [(ngModel)]="product.packageSize"
+                            (change)="calculateMargins()"
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                        >
+                            <option value="12">12 bouteilles</option>
+                            <option value="24">24 bouteilles</option>
                         </select>
                     </div>
+                </div>
+
+                <!-- Champs selon le type -->
+                <div *ngIf="product.boissonType === 'Vin' || product.boissonType === 'Whisky'" class="grid grid-cols-1 gap-4">
                     <div>
-                        <label for="nombreCasier" class="block text-sm text-gray-700 mb-1">Nombre de Casier</label>
-                        <input type="number" id="nombreCasier" name="nombreCasier" [(ngModel)]="product.nombreCasier" (input)="calculateMargins()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                        <label for="nombreBouteilles" class="block text-sm text-gray-700 mb-1">Nombre de bouteilles</label>
+                        <input
+                            type="number"
+                            id="nombreBouteilles"
+                            name="nombreBouteilles"
+                            [(ngModel)]="product.nombreBouteilles"
+                            (input)="calculateMargins()"
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                        />
                     </div>
+                </div>
+
+                <!-- Casier complet -->
+                <div *ngIf="showCaseTypeField && product.packageType === 'casier' && product.caseType === 'full'" class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="nombreCasier" class="block text-sm text-gray-700 mb-1">Nombre de casiers</label>
+                        <input
+                            type="number"
+                            id="nombreCasier"
+                            name="nombreCasier"
+                            [(ngModel)]="product.nombreCasier"
+                            (input)="calculateMargins()"
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label for="bottlesPerCase" class="block text-sm text-gray-700 mb-1">Bouteilles par casier</label>
+                        <input
+                            type="number"
+                            id="bottlesPerCase"
+                            name="bottlesPerCase"
+                            [(ngModel)]="product.bottlesPerCase"
+                            (input)="calculateMargins()"
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                        />
+                    </div>
+                </div>
+
+                <!-- Demi-casier -->
+                <div *ngIf="showCaseTypeField && product.packageType === 'casier' && product.caseType === 'half'" class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label for="nombreBouteilles" class="block text-sm text-gray-700 mb-1">Nombre de bouteilles</label>
+                        <input
+                            type="number"
+                            id="nombreBouteilles"
+                            name="nombreBouteilles"
+                            [(ngModel)]="product.nombreBouteilles"
+                            (input)="calculateMargins()"
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                        />
+                    </div>
+                </div>
+
+                <!-- Paquets -->
+                <div *ngIf="showPaquetFields" class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="nombrePaquet" class="block text-sm text-gray-700 mb-1">Nombre de paquets</label>
+                        <input
+                            type="number"
+                            id="nombrePaquet"
+                            name="nombrePaquet"
+                            [(ngModel)]="product.nombrePaquet"
+                            (input)="calculateMargins()"
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Bouteilles par paquet</label>
+                        <div class="bg-gray-100 p-3 rounded-lg border border-gray-400 text-sm">
+                            {{ product.packageSize }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Affichage quantité totale -->
+                <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm font-medium text-blue-800">
+                        Quantité totale: <span class="font-bold">{{ product.quantity }} bouteilles</span>
+                    </p>
+                    <p *ngIf="product.boissonType === 'Vin' || product.boissonType === 'Whisky'" class="text-xs text-blue-600 mt-1">
+                        (Vendu à l'unité)
+                    </p>
+                    <p *ngIf="product.packageType === 'casier' && product.caseType === 'full'" class="text-xs text-blue-600 mt-1">
+                        ({{ product.nombreCasier }} casier(s) × {{ product.bottlesPerCase }} bouteilles)
+                    </p>
+                    <p *ngIf="product.packageType === 'casier' && product.caseType === 'half'" class="text-xs text-blue-600 mt-1">
+                        ({{ product.nombreBouteilles }} bouteilles en demi-casiers)
+                    </p>
+                    <p *ngIf="product.packageType === 'paquet'" class="text-xs text-blue-600 mt-1">
+                        ({{ product.nombrePaquet }} paquet(s) × {{ product.packageSize }} bouteilles)
+                    </p>
                 </div>
             </div>
 
@@ -86,10 +189,25 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="plats" class="block text-sm text-gray-700 mb-1">Nombre de Plats</label>
-                        <input type="number" id="plats" name="plats" [(ngModel)]="product.plats" (input)="calculateMargins()" required class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                        <input 
+                            type="number" 
+                            id="plats" 
+                            name="plats" 
+                            [(ngModel)]="product.plats" 
+                            (input)="updateDemiPlats(); calculateMargins()" 
+                            required 
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" 
+                        />
                     </div>
                     <div class="flex items-center">
-                        <input type="checkbox" id="hasDemiPlat" name="hasDemiPlat" [(ngModel)]="product.hasDemiPlat" (change)="updateFieldVisibility(); calculateMargins()" class="mr-2 h-4 w-4 text-indigo-600 border-gray-400 rounded" />
+                        <input 
+                            type="checkbox" 
+                            id="hasDemiPlat" 
+                            name="hasDemiPlat" 
+                            [(ngModel)]="product.hasDemiPlat" 
+                            (change)="updateDemiPlats(); calculateMargins()" 
+                            class="mr-2 h-4 w-4 text-indigo-600 border-gray-400 rounded" 
+                        />
                         <label for="hasDemiPlat" class="text-sm text-gray-700">Vendre en demi-plats ?</label>
                     </div>
                 </div>
@@ -97,12 +215,36 @@
                 <div *ngIf="showDemiPlatPrices" class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="vipPriceDemiPlat" class="block text-sm text-gray-700 mb-1">Prix VIP Demi-Plat (FC)</label>
-                        <input type="number" id="vipPriceDemiPlat" name="vipPriceDemiPlat" [(ngModel)]="product.vipPriceDemiPlat" (input)="calculateMargins()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                        <input 
+                            type="number" 
+                            id="vipPriceDemiPlat" 
+                            name="vipPriceDemiPlat" 
+                            [(ngModel)]="product.vipPriceDemiPlat" 
+                            (input)="calculateMargins()" 
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" 
+                        />
                     </div>
                     <div>
                         <label for="terracePriceDemiPlat" class="block text-sm text-gray-700 mb-1">Prix Terrasse Demi-Plat (FC)</label>
-                        <input type="number" id="terracePriceDemiPlat" name="terracePriceDemiPlat" [(ngModel)]="product.terracePriceDemiPlat" (input)="calculateMargins()" class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                        <input 
+                            type="number" 
+                            id="terracePriceDemiPlat" 
+                            name="terracePriceDemiPlat" 
+                            [(ngModel)]="product.terracePriceDemiPlat" 
+                            (input)="calculateMargins()" 
+                            class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" 
+                        />
                     </div>
+                </div>
+
+                <!-- Affichage quantité totale pour nourriture -->
+                <div class="mb-4 p-3 bg-green-50 rounded-lg">
+                    <p class="text-sm font-medium text-green-800">
+                        Quantité totale: <span class="font-bold">{{ product.quantity }} {{ product.hasDemiPlat ? 'demi-plats' : 'plats' }}</span>
+                    </p>
+                    <p *ngIf="product.hasDemiPlat" class="text-xs text-green-600 mt-1">
+                        ({{ product.plats }} plats complets → {{ product.plats * 2 }} demi-plats)
+                    </p>
                 </div>
             </div>
 
@@ -124,26 +266,79 @@
             <div class="grid grid-cols-2 gap-4 mb-5">
                 <div>
                     <label for="vipPrice" class="block text-sm text-gray-700 mb-1">Prix de Vente VIP (FC)</label>
-                    <input type="number" id="vipPrice" name="vipPrice" [(ngModel)]="product.vipPrice" (input)="calculateMargins()" required class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                    <input 
+                        type="number" 
+                        id="vipPrice" 
+                        name="vipPrice" 
+                        [(ngModel)]="product.vipPrice" 
+                        (input)="calculateMargins()" 
+                        required 
+                        class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" 
+                    />
                 </div>
                 <div>
                     <label for="terracePrice" class="block text-sm text-gray-700 mb-1">Prix de Vente Terrasse (FC)</label>
-                    <input type="number" id="terracePrice" name="terracePrice" [(ngModel)]="product.terracePrice" (input)="calculateMargins()" required class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" />
+                    <input 
+                        type="number" 
+                        id="terracePrice" 
+                        name="terracePrice" 
+                        [(ngModel)]="product.terracePrice" 
+                        (input)="calculateMargins()" 
+                        required 
+                        class="w-full p-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition-all text-sm" 
+                    />
                 </div>
             </div>
 
             <!-- Affichage des marges calculées -->
             <div class="grid grid-cols-2 gap-4 mb-6">
+                <!-- Marge VIP -->
                 <div>
                     <label class="block text-sm text-gray-700 mb-1">Marge VIP (FC)</label>
                     <div class="bg-gray-100 p-3 rounded-lg border border-gray-400 text-sm text-gray-800">
-                        {{ product.marginVIP | number : '1.2-2' }}
+                        <div class="font-bold text-lg mb-2">{{ product.marginVIP | number : '1.2-2' }}</div>
+                        
+                        <!-- Détail unitaire -->
+                        <div class="mt-2 text-xs border-t pt-2">
+                            <div class="font-medium">Détail unitaire:</div>
+                            <div>• Prix: {{ product.vipPrice | number : '1.2-2' }}</div>
+                            <div>• Coût unitaire: {{ (product.purchasePrice / product.quantity) | number : '1.2-2' }}</div>
+                            <div class="font-medium">• Marge unitaire: {{ product.marginUnitVIP | number : '1.2-2' }}</div>
+                        </div>
+            
+                        <!-- Détail demi-plats si applicable -->
+                        <div *ngIf="product.type === 'Nourriture' && product.hasDemiPlat" class="mt-2 text-xs border-t pt-2">
+                            <div class="font-medium">Détail demi-plats:</div>
+                            <div>• Prix: {{ (product.vipPrice / 2) | number : '1.2-2' }} × {{ product.plats * 2 }}</div>
+                            <div>• Coût total: {{ product.purchasePrice | number : '1.2-2' }}</div>
+                            <div class="font-medium">• Marge unitaire: {{ product.marginDemiPlatVIP | number : '1.2-2' }}</div>
+                            <div class="font-medium">• Marge totale: {{ product.marginVIP | number : '1.2-2' }}</div>
+                        </div>
                     </div>
                 </div>
+            
+                <!-- Marge Terrasse -->
                 <div>
                     <label class="block text-sm text-gray-700 mb-1">Marge Terrasse (FC)</label>
                     <div class="bg-gray-100 p-3 rounded-lg border border-gray-400 text-sm text-gray-800">
-                        {{ product.marginTerrace | number : '1.2-2' }}
+                        <div class="font-bold text-lg mb-2">{{ product.marginTerrace | number : '1.2-2' }}</div>
+                        
+                        <!-- Détail unitaire -->
+                        <div class="mt-2 text-xs border-t pt-2">
+                            <div class="font-medium">Détail unitaire:</div>
+                            <div>• Prix: {{ product.terracePrice | number : '1.2-2' }}</div>
+                            <div>• Coût unitaire: {{ (product.purchasePrice / product.quantity) | number : '1.2-2' }}</div>
+                            <div class="font-medium">• Marge unitaire: {{ product.marginUnitTerrace | number : '1.2-2' }}</div>
+                        </div>
+            
+                        <!-- Détail demi-plats si applicable -->
+                        <div *ngIf="product.type === 'Nourriture' && product.hasDemiPlat" class="mt-2 text-xs border-t pt-2">
+                            <div class="font-medium">Détail demi-plats:</div>
+                            <div>• Prix: {{ (product.terracePrice / 2) | number : '1.2-2' }} × {{ product.plats * 2 }}</div>
+                            <div>• Coût total: {{ product.purchasePrice | number : '1.2-2' }}</div>
+                            <div class="font-medium">• Marge unitaire: {{ product.marginDemiPlatTerrace | number : '1.2-2' }}</div>
+                            <div class="font-medium">• Marge totale: {{ product.marginTerrace | number : '1.2-2' }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
