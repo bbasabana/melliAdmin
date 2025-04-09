@@ -1,25 +1,53 @@
 <div class="container mx-auto p-4">
     <!-- Mini Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-blue-100 p-4 rounded shadow">
-            <h3 class="font-semibold text-gray-700">Total Produits</h3>
-            <p class="text-2xl font-bold text-blue-600">{{ totalProducts }}</p>
+    <div class="stats-grid mb-6">
+        <!-- Première ligne - 3 cartes -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <!-- Total Produits -->
+            <div class="bg-blue-100 p-4 rounded-lg shadow-md border border-blue-200">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Total Produits</h3>
+                <p class="text-xl sm:text-2xl font-bold text-blue-600">{{ totalProducts }}</p>
+            </div>
+            
+            <!-- Marge VIP -->
+            <div class="bg-green-100 p-4 rounded-lg shadow-md border border-green-200">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Marge VIP Totale</h3>
+                <p class="text-xl sm:text-2xl font-bold text-green-600">{{ totalVipMargin | number:'1.2-2' }} FC</p>
+            </div>
+            
+            <!-- Marge Terrasse -->
+            <div class="bg-yellow-100 p-4 rounded-lg shadow-md border border-yellow-200">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Marge Terrasse Totale</h3>
+                <p class="text-xl sm:text-2xl font-bold text-yellow-600">{{ totalTerraceMargin | number:'1.2-2' }} FC</p>
+            </div>
         </div>
-        <div class="bg-green-100 p-4 rounded shadow">
-            <h3 class="font-semibold text-gray-700">Marge VIP Totale</h3>
-            <p class="text-2xl font-bold text-green-600">{{ totalVipMargin | number:'1.2-2' }}</p>
-        </div>
-        <div class="bg-yellow-100 p-4 rounded shadow">
-            <h3 class="font-semibold text-gray-700">Marge Terrasse Totale</h3>
-            <p class="text-2xl font-bold text-yellow-600">{{ totalTerraceMargin | number:'1.2-2' }}</p>
-        </div>
-        <div class="bg-red-100 p-4 rounded shadow">
-            <h3 class="font-semibold text-gray-700">Bouteilles Sucrées Totales</h3>
-            <p class="text-2xl font-bold text-red-600">{{ totalBottlesSucree > 0 ? totalBottlesSucree : 0 }}</p>
-        </div>
-        <div class="bg-purple-100 p-4 rounded shadow">
-            <h3 class="font-semibold text-gray-700">Bouteilles Bière Totales</h3>
-            <p class="text-2xl font-bold text-purple-600">{{ totalBottlesBiere > 0 ? totalBottlesBiere : 0 }}</p>
+    
+        <!-- Deuxième ligne - 3 cartes -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Total Plats -->
+            <div class="bg-purple-100 p-4 rounded-lg shadow-md border border-purple-200">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Total Plats</h3>
+                <p class="text-xl sm:text-2xl font-bold text-purple-600">{{ totalPlats }}</p>
+            </div>
+            
+            <!-- Total Demi-Plats (seulement si > 0) -->
+            <div class="bg-pink-100 p-4 rounded-lg shadow-md border border-pink-200" *ngIf="totalDemiPlats > 0">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Total Demi-Plats</h3>
+                <p class="text-xl sm:text-2xl font-bold text-pink-600">{{ totalDemiPlats }}</p>
+            </div>
+            
+            <!-- Bouteilles Sucrées ou Bière (alternance) -->
+            <div class="bg-red-100 p-4 rounded-lg shadow-md border border-red-200" *ngIf="totalBottlesSucree > 0; else biereCard">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Bouteilles Sucrées</h3>
+                <p class="text-xl sm:text-2xl font-bold text-red-600">{{ totalBottlesSucree }}</p>
+            </div>
+            
+            <ng-template #biereCard>
+                <div class="bg-indigo-100 p-4 rounded-lg shadow-md border border-indigo-200" *ngIf="totalBottlesBiere > 0">
+                    <h3 class="text-sm sm:text-base font-semibold text-gray-700 mb-1">Bouteilles Bière</h3>
+                    <p class="text-xl sm:text-2xl font-bold text-indigo-600">{{ totalBottlesBiere }}</p>
+                </div>
+            </ng-template>
         </div>
     </div>
     <!-- Filters -->
@@ -120,7 +148,7 @@
         </button>
     </div>
     <!-- Edit Product Modal -->
-    <div *ngIf="isEditModalOpen" class="fixed top-0 left-0 w-full h-full flex items-center justify-center"
+    <!-- <div *ngIf="isEditModalOpen" class="fixed top-0 left-0 w-full h-full flex items-center justify-center"
          style="background-color: rgba(0,0,0,0.5);">
         <div class="bg-white rounded shadow-lg p-8 max-w-lg w-full">
             <h2 class="text-2xl font-bold mb-4">Modifier le Produit</h2>
@@ -186,6 +214,174 @@
                         [disabled]="isLoading">
                     <span *ngIf="!isLoading">Enregistrer</span>
                     <span *ngIf="isLoading">Enregistrement...</span>
+                </button>
+            </div>
+        </div>
+    </div> -->
+    <div *ngIf="isEditModalOpen" class="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Modifier le Produit</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Nom et Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                    <input type="text" [(ngModel)]="productToEdit!.name" 
+                           class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select [(ngModel)]="productToEdit!.type" (change)="onEditTypeChange()"
+                            class="w-full p-2 border border-gray-300 rounded-md">
+                        <option value="Boisson">Boisson</option>
+                        <option value="Nourriture">Nourriture</option>
+                    </select>
+                </div>
+    
+
+                <!-- Section Boissons -->
+                <div *ngIf="productToEdit!.type === 'Boisson'" class="md:col-span-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Type de Boisson</label>
+                            <select [(ngModel)]="productToEdit!.boissonType" (change)="onEditBoissonTypeChange()"
+                                    class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="Biere">Biere</option>
+                                <option value="Eau">Eau</option>
+                                <option value="Sucree">Sucree</option>
+                                <option value="Vin">Vin</option>
+                                <option value="Whisky">Whisky</option>
+                            </select>
+                        </div>
+
+                        <div *ngIf="productToEdit!.boissonType === 'Eau' || productToEdit!.boissonType === 'Sucree'">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                            <select [(ngModel)]="productToEdit!.packageType" (change)="onPackageTypeChange()"
+                                    class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="casier">Casier</option>
+                                <option value="paquet">Paquet</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <!-- Vin/Whisky - Unité -->
+                        <div *ngIf="productToEdit!.boissonType === 'Vin' || productToEdit!.boissonType === 'Whisky'">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de Bouteilles</label>
+                            <input type="number" [(ngModel)]="productToEdit!.nombreBouteilles" 
+                                (input)="calculateMargins(productToEdit!)"
+                                class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+
+                        <!-- Eau/Sucree en paquets -->
+                        <div *ngIf="(productToEdit!.boissonType === 'Eau' || productToEdit!.boissonType === 'Sucree') 
+                                && productToEdit!.packageType === 'paquet'">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de Paquets</label>
+                            <input type="number" [(ngModel)]="productToEdit!.nombrePaquet"
+                                (input)="calculateMargins(productToEdit!)"
+                                class="w-full p-2 border border-gray-300 rounded-md">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Bouteilles: {{ (productToEdit!.nombrePaquet || 0) * (productToEdit!.packageSize || 0) }}
+                            </p>
+                        </div>
+
+                        <!-- Biere/Eau/Sucree en casiers -->
+                        <div *ngIf="productToEdit!.packageType === 'casier' 
+                                && (productToEdit!.boissonType === 'Biere' 
+                                    || productToEdit!.boissonType === 'Eau' 
+                                    || productToEdit!.boissonType === 'Sucree')">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de Casiers</label>
+                            <input type="number" [(ngModel)]="productToEdit!.nombreCasier"
+                                (input)="calculateMargins(productToEdit!)"
+                                class="w-full p-2 border border-gray-300 rounded-md">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Bouteilles: {{ (productToEdit!.nombreCasier || 0) * (productToEdit!.bottlesPerCase || 0) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Section Nourriture -->
+                <div *ngIf="productToEdit!.type === 'Nourriture'" class="md:col-span-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de Plats</label>
+                            <input type="number" [(ngModel)]="productToEdit!.plats" 
+                                   (input)="calculateMargins(productToEdit!)"
+                                   class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                
+                        <div class="flex items-end">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="editHasDemiPlat" [(ngModel)]="productToEdit!.hasDemiPlat" 
+                                       (change)="calculateMargins(productToEdit!)"
+                                       class="h-4 w-4">
+                                <label for="editHasDemiPlat" class="ml-2 text-sm">Vendre en demi-plats</label>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div *ngIf="productToEdit!.hasDemiPlat" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prix VIP Demi-Plat</label>
+                            <input type="number" [(ngModel)]="productToEdit!.vipPriceDemiPlat" 
+                                   (input)="calculateMargins(productToEdit!)"
+                                   class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prix Terrasse Demi-Plat</label>
+                            <input type="number" [(ngModel)]="productToEdit!.terracePriceDemiPlat" 
+                                   (input)="calculateMargins(productToEdit!)"
+                                   class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Prix -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'Achat (FC)</label>
+                    <input type="number" [(ngModel)]="productToEdit!.purchasePrice" (input)="calculateMargins(productToEdit!)"
+                           class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+    
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prix VIP (FC)</label>
+                    <input type="number" [(ngModel)]="productToEdit!.vipPrice" (input)="calculateMargins(productToEdit!)"
+                           class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+    
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prix Terrasse (FC)</label>
+                    <input type="number" [(ngModel)]="productToEdit!.terracePrice" (input)="calculateMargins(productToEdit!)"
+                           class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+            </div>
+    
+            <!-- Affichage des Marges -->
+            <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-medium text-gray-800 mb-2">Marges</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Marge VIP Actuelle:</p>
+                        <p class="text-lg font-bold text-green-600">{{ productToEdit!.marginVIP | number:'1.2-2' }} FC</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Marge Terrasse Actuelle:</p>
+                        <p class="text-lg font-bold text-green-600">{{ productToEdit!.marginTerrace | number:'1.2-2' }} FC</p>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Boutons -->
+            <div class="flex justify-end space-x-3 mt-6">
+                <button (click)="closeEditModal()" 
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Annuler
+                </button>
+                <button (click)="saveProduct()" [disabled]="isLoading"
+                        class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    Enregistrer
                 </button>
             </div>
         </div>

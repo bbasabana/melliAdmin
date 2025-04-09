@@ -6,10 +6,12 @@ import { Sale } from '../models/sale.model';
 import { Purchase } from '../models/purchase.model';
 import { Expense } from '../models/expense.model';
 
+
 @Injectable({
   providedIn: 'root',
 })
 export class ManagementService {
+
   private firestore = inject(Firestore); // Injecter Firestore avec `inject`
   private injector = inject(Injector); // Injecter l'Injector
 
@@ -107,6 +109,18 @@ export class ManagementService {
         throw error; // Propager l'erreur
       }
     });
+  }
+
+  async deleteClient(id: string): Promise<boolean> {
+    try {
+      const clientRef = doc(this.firestore, 'clients', id);
+      await deleteDoc(clientRef);
+      console.log('Client supprimé avec succès, ID:', id);
+      return true;
+    } catch (error) {
+      console.error('Erreur suppression client:', error);
+      throw error;
+    }
   }
 
   // **Ventes**

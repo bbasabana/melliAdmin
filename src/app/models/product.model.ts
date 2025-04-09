@@ -1,3 +1,5 @@
+/* This code snippet is defining an interface named `Product` in TypeScript. An interface in TypeScript
+is a way to define the shape of an object. */
 export interface Product {
   id: string;
   name: string;
@@ -13,7 +15,7 @@ export interface Product {
   profitTerrace: number;
   isForSale: boolean;
   observations: string;
-  packageType: 'casier' | 'paquet'; // Nouveau champ pour le type d'emballage
+  packageType?: 'casier' | 'paquet'; // Nouveau champ pour le type d'emballage
   caseType: 'full' | 'half'; // Seulement si packageType = 'casier'
   marginVIP: number;
   marginTerrace: number;
@@ -34,5 +36,9 @@ export interface Product {
   nombreBouteilles: number;
   createdAt: string;
   lastModified?: string;
-  packageSize?: number; // Taille du paquet (12 ou 24)
+  packageSize?: number; 
+  totalPlats?: number;
+  totalDemiPlats?: number; 
 }
+
+

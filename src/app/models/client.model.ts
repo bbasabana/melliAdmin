@@ -1,8 +1,12 @@
-// src/app/models/client.model.ts
 export interface Client {
-    id?: string;
-    name: string;
-    phoneNumber: string;
-    totalSpent: number;
-    points: number;
+  id?: string; 
+  clientNumber: string;
+  name: string;
+  phoneNumber: string;
+  email?: string;
+  address?: string;
+  points: number;
+  totalSpent: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   }

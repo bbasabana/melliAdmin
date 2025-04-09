@@ -1,1 +1,116 @@
-<p>clients works!</p>
+<div class="client-form-container">
+    <h2>{{ isEditMode ? 'Modifier Client' : 'Ajouter un Nouveau Client' }}</h2>
+    
+    <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="client-form">
+    <div class="form-group">
+        <label for="clientNumber">Numéro Client *</label>
+        <div class="client-number-container">
+          <input 
+            type="text" 
+            id="clientNumber" 
+            formControlName="clientNumber" 
+            placeholder="Numéro client"
+            [ngClass]="{ 'is-invalid': clientForm.get('clientNumber')?.invalid && clientForm.get('clientNumber')?.touched }"
+            readonly>
+          <button 
+            type="button" 
+            class="btn-generate"
+            (click)="generateClientNumber()"
+            [disabled]="isEditMode">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+            </svg>
+            Générer
+          </button>
+        </div>
+        <div *ngIf="clientForm.get('clientNumber')?.invalid && clientForm.get('clientNumber')?.touched" class="error-message">
+          Le numéro client est obligatoire
+        </div>
+      </div>
+      <!-- Nom -->
+      <div class="form-group">
+        <label for="name">Nom complet *</label>
+        <input 
+          type="text" 
+          id="name" 
+          formControlName="name" 
+          placeholder="Entrez le nom complet"
+          [ngClass]="{ 'is-invalid': clientForm.get('name')?.invalid && clientForm.get('name')?.touched }">
+        <div *ngIf="clientForm.get('name')?.invalid && clientForm.get('name')?.touched" class="error-message">
+          <span *ngIf="clientForm.get('name')?.errors?.['required']">Le nom est obligatoire</span>
+          <span *ngIf="clientForm.get('name')?.errors?.['minlength']">Le nom doit contenir au moins 2 caractères</span>
+        </div>
+      </div>
+  
+      <!-- Téléphone -->
+      <div class="form-group">
+        <label for="phoneNumber">Numéro de téléphone *</label>
+        <input 
+          type="tel" 
+          id="phoneNumber" 
+          formControlName="phoneNumber" 
+          placeholder="Ex: 0781234567"
+          [ngClass]="{ 'is-invalid': clientForm.get('phoneNumber')?.invalid && clientForm.get('phoneNumber')?.touched }">
+        <div *ngIf="clientForm.get('phoneNumber')?.invalid && clientForm.get('phoneNumber')?.touched" class="error-message">
+          <span *ngIf="clientForm.get('phoneNumber')?.errors?.['required']">Le numéro de téléphone est obligatoire</span>
+          <span *ngIf="clientForm.get('phoneNumber')?.errors?.['pattern']">Le numéro doit contenir exactement 10 chiffres</span>
+        </div>
+      </div>
+  
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="Ex: client@example.com"
+          [ngClass]="{ 'is-invalid': clientForm.get('email')?.invalid && clientForm.get('email')?.touched }">
+        <div *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched" class="error-message">
+          <span *ngIf="clientForm.get('email')?.errors?.['email']">Veuillez entrer un email valide</span>
+        </div>
+      </div>
+  
+      <!-- Adresse -->
+      <div class="form-group">
+        <label for="address">Adresse</label>
+        <textarea 
+          id="address" 
+          formControlName="address" 
+          placeholder="Adresse complète du client"
+          rows="3"></textarea>
+      </div>
+  
+      <!-- Boutons -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn-primary"
+          [disabled]="clientForm.invalid || (notificationService.isLoading$ | async)">
+          <span *ngIf="notificationService.isLoading$ | async; else submitText">
+            <i class="spinner"></i> Enregistrement...
+          </span>
+          <ng-template #submitText>
+            {{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+          </ng-template>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn-secondary" 
+          (click)="resetForm()"
+          [disabled]="notificationService.isLoading$ | async">
+          Annuler
+        </button>
+      </div>
+    </form>
+  
+    <!-- Notifications -->
+    <div *ngIf="notificationService.successMessage$ | async as message" class="alert success">
+      {{ message }}
+    </div>
+    
+    <div *ngIf="notificationService.errorMessage$ | async as message" class="alert error">
+      {{ message }}
+    </div>
+  </div>

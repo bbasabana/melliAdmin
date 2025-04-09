@@ -1,0 +1,35 @@
+
+  
+  button {
+    background-color: #3b82f6;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  
+    &:hover {
+      background-color: #2563eb;
+    }
+  
+    &[disabled] {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  }
+  
+  .fa-spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }

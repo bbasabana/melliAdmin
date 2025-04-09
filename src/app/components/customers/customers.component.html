@@ -1,1 +1,184 @@
-<p>customers works!</p>
+<div class="flex flex-col lg:flex-row gap-4 p-4">
+    <!-- Formulaire - Partie gauche -->
+    <div class="lg:w-1/2 bg-white rounded-lg shadow-sm p-4 border">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+        {{ isEditMode ? 'Modifier Client' : 'Nouveau Client' }}
+      </h2>
+      
+      <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="space-y-3">
+        <!-- Numéro Client -->
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Numéro Client</label>
+          <div class="flex gap-2">
+            <input 
+              formControlName="clientNumber"
+              readonly
+              class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-400">
+            <button 
+              type="button"
+              (click)="generateClientNumber()"
+              [disabled]="isEditMode"
+              class="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50">
+              Générer
+            </button>
+          </div>
+        </div>
+  
+        <!-- Nom -->
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Nom complet *</label>
+          <input 
+            formControlName="name"
+            class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-400">
+        </div>
+  
+        <!-- Téléphone -->
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Téléphone *</label>
+          <input 
+            formControlName="phoneNumber"
+            class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-400">
+        </div>
+  
+        <!-- Email -->
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Email</label>
+          <input 
+            formControlName="email"
+            class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-400">
+        </div>
+  
+        <!-- Adresse -->
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Adresse</label>
+          <textarea 
+            formControlName="address"
+            rows="2"
+            class="w-full px-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-400"></textarea>
+        </div>
+  
+        <!-- Boutons -->
+        <div class="flex gap-2 pt-2">
+          <button 
+            type="submit" 
+            [disabled]="clientForm.invalid || (notificationService.isLoading$ | async)"
+            class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50">
+            {{ isEditMode ? 'Modifier' : 'Ajouter' }}
+          </button>
+          <button 
+            type="button" 
+            (click)="resetForm()"
+            class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  
+    <!-- Tableau - Partie droite -->
+    <div class="lg:w-1/2 bg-white rounded-lg shadow-sm p-4 border">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-semibold text-gray-800">Liste des Clients</h2>
+      </div>
+  
+      <!-- Loader -->
+      <div *ngIf="loading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-400"></div>
+      </div>
+  
+      <!-- Tableau -->
+      <div *ngIf="!loading" class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="border-b">
+              <th class="text-left py-2">Nom</th>
+              <th class="text-left py-2">Téléphone</th>
+              <th class="text-right py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let client of clients | slice:(page-1)*pageSize:page*pageSize" class="border-b hover:bg-gray-50">
+                <td class="py-2">
+                    <div class="font-medium">{{ client?.name || 'N/A' }}</div>
+                    <div class="text-xs text-gray-500">{{ client?.clientNumber || 'N/A' }}</div>
+               </td>
+              <td class="py-2">{{ client?.phoneNumber || 'N/A' }}</td>
+              <td class="py-2 text-right space-x-1">
+                <button 
+                  (click)="editClient(client)"
+                  class="p-1 text-blue-500 hover:text-blue-700 rounded hover:bg-blue-50">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+                <button (click)="client.id && openDeleteModal(client.id)" class="p-1 text-red-500 hover:text-red-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+  
+        <!-- Pagination -->
+        <div class="flex justify-between items-center mt-3 text-xs">
+          <div>Page {{ page }} sur {{ getTotalPages() }}</div>
+          <div class="flex space-x-1">
+            <button 
+              (click)="prevPage()" 
+              [disabled]="page === 1"
+              class="px-2 py-1 border rounded disabled:opacity-30">
+              Précédent
+            </button>
+            <button 
+              (click)="nextPage()" 
+              [disabled]="page*pageSize >= clients.length"
+              class="px-2 py-1 border rounded disabled:opacity-30">
+              Suivant
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Notifications -->
+  <div *ngIf="notificationService.successMessage$ | async as message" 
+       class="fixed top-3 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-sm py-1 px-3 rounded shadow flex items-center">
+    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    {{ message }}
+  </div>
+  
+  <div *ngIf="notificationService.errorMessage$ | async as message" 
+       class="fixed top-3 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-sm py-1 px-3 rounded shadow flex items-center">
+    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+    {{ message }}
+  </div>
+
+
+<!-- Modal de confirmation -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 bg-sky-500/50 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+      <h3 class="text-lg font-medium mb-4">Confirmer la suppression</h3>
+      <p class="mb-6">Êtes-vous sûr de vouloir supprimer ce client ?</p>
+      <div class="flex justify-end space-x-3">
+        <button 
+          (click)="showDeleteModal = false"
+          class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+          Annuler
+        </button>
+        <button 
+          (click)="confirmDelete()"
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
