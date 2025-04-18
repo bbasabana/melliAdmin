@@ -56,6 +56,16 @@
     </li>
     <li>
       <a
+        [class.active]="activeSection === 'sales-list'"
+        (click)="onSelect('sales-list')"
+        class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"
+      >
+        <span class="material-icons mr-3">list</span>
+        <span>Liste ventes</span>
+      </a>
+    </li>
+    <li>
+      <a
         [class.active]="activeSection === 'purchases'"
         (click)="onSelect('purchases')"
         class="flex items-center py-3 px-4 hover:bg-blue-50 rounded-lg transition duration-300"

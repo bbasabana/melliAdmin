@@ -1,1 +1,133 @@
-<p>sales works!</p>
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md border border-black">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b border-black pb-2">Nouvelle Vente</h2>
+
+  <form [formGroup]="salesForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Colonne de gauche -->
+    <div class="space-y-4">
+      <!-- Numéro de vente -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Numéro de vente</label>
+        <input formControlName="saleNumber" readonly 
+               class="mt-1 block w-full rounded-md border border-black shadow-sm bg-gray-100 p-2">
+      </div>
+
+      <!-- Produit -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Produit *</label>
+        <select formControlName="productId" 
+                class="mt-1 block w-full rounded-md border border-black shadow-sm p-2">
+          <option value="">Sélectionnez un produit</option>
+          <option *ngFor="let product of products" [value]="product.id">
+            {{product.name}} ({{product.quantity}} disponible) - {{product.type}}
+          </option>
+        </select>
+      </div>
+
+      <!-- Espace -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Espace *</label>
+        <select formControlName="saleSpace" 
+                class="mt-1 block w-full rounded-md border border-black shadow-sm p-2">
+          <option *ngFor="let space of saleSpaces" [value]="space.name">
+            {{space.name}}
+          </option>
+        </select>
+      </div>
+
+      <!-- Quantité -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Quantité *</label>
+        <input type="number" formControlName="quantity" min="1"
+               class="mt-1 block w-full rounded-md border border-black shadow-sm p-2">
+      </div>
+    </div>
+
+    <!-- Colonne de droite -->
+    <div class="space-y-4">
+      <!-- Client -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Client</label>
+        <input type="text" formControlName="clientSearch" 
+               placeholder="Rechercher un client..."
+               (input)="filterClients()"
+               class="mt-1 block w-full rounded-md border border-black shadow-sm p-2">
+        
+        <!-- Affichage du solde de points -->
+        <div *ngIf="selectedClient" class="mt-2 text-sm text-blue-600">
+          Solde actuel: {{currentClientPoints}} points (10 points = 5000 FC)
+        </div>
+        
+        <!-- Liste des clients filtrés -->
+        <div *ngIf="filteredClients.length > 0" class="mt-1 border border-black rounded-md max-h-40 overflow-auto">
+          <div *ngFor="let client of filteredClients" 
+               (click)="selectClient(client)"
+               class="p-2 hover:bg-blue-50 cursor-pointer border-b border-gray-200">
+            {{client.name}} ({{client.phoneNumber}}) - {{client.points || 0}} pts
+          </div>
+        </div>
+      </div>
+
+      <!-- Méthode de paiement -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Méthode de paiement *</label>
+        <select formControlName="paymentMethod" 
+                class="mt-1 block w-full rounded-md border border-black shadow-sm p-2">
+          <option *ngFor="let method of paymentMethods" [value]="method.name">
+            {{method.name}}
+          </option>
+        </select>
+      </div>
+
+      <!-- Points à utiliser -->
+      <div *ngIf="selectedClient && salesForm.get('paymentMethod')?.value === 'Points'">
+        <label class="block text-sm font-medium text-gray-700">
+          Points à utiliser (max: {{maxPointsToUse}})
+        </label>
+        <input type="number" formControlName="pointsToUse" 
+               [max]="maxPointsToUse" min="0" step="10"
+               class="mt-1 block w-full rounded-md border border-black shadow-sm p-2">
+        <div class="text-sm text-gray-500 mt-1">
+          Par tranches de 10 points (5000 FC de réduction par tranche)
+        </div>
+      </div>
+
+      <!-- Réduction obtenue -->
+      <div *ngIf="salesForm.get('discountFromPoints')?.value > 0">
+        <label class="block text-sm font-medium text-gray-700">Réduction points</label>
+        <input formControlName="discountFromPoints" readonly 
+               class="mt-1 block w-full rounded-md border border-black shadow-sm bg-gray-100 p-2">
+      </div>
+
+      <!-- Montant total -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Montant total</label>
+        <input formControlName="totalPrice" readonly 
+               class="mt-1 block w-full rounded-md border border-black shadow-sm bg-gray-100 p-2">
+      </div>
+
+      <!-- Montant à payer -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Montant à payer</label>
+        <input formControlName="amountToPay" readonly 
+               class="mt-1 block w-full rounded-md border border-black shadow-sm bg-gray-100 p-2">
+      </div>
+
+      <!-- Points gagnés -->
+      <div *ngIf="selectedClient && salesForm.get('paymentMethod')?.value !== 'Points'">
+        <label class="block text-sm font-medium text-gray-700">Points gagnés</label>
+        <input formControlName="pointsEarned" readonly 
+               class="mt-1 block w-full rounded-md border border-black shadow-sm bg-gray-100 p-2">
+      </div>
+
+      <!-- Bouton de soumission -->
+      <div class="md:col-span-2 pt-4">
+        <button type="submit" 
+                [disabled]="isLoading || salesForm.invalid"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md border border-black hover:bg-blue-700 disabled:bg-blue-300 transition-colors">
+          <span *ngIf="!isLoading">Enregistrer la vente</span>
+          <span *ngIf="isLoading">Enregistrement en cours...</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

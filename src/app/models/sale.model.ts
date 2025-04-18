@@ -1,10 +1,19 @@
-// src/app/models/sale.model.ts
 export interface Sale {
-    id?: string;
-    date: Date;
-    product: string;
-    space: 'VIP' | 'Terrasse';
-    quantity: number;
-    totalPrice: number;
-    clientName: string;
-  }
+  id?: string;
+  saleNumber: string;
+  productId: string;
+  productName: string;
+  saleSpace: string;
+  quantity: number;
+  totalPrice: number;
+  clientName?: string;
+  pointsEarned?: number;
+  pointsUsed?: number;
+  paymentMethod: string;
+  saleDate:string; 
+  saleTime?: string; 
+  amountPaid: number;
+  pointsBefore: number;
+  pointsAfter: number;
+  discountFromPoints?: number;
+}

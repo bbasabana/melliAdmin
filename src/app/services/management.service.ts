@@ -5,6 +5,7 @@ import { Client } from '../models/client.model';
 import { Sale } from '../models/sale.model';
 import { Purchase } from '../models/purchase.model';
 import { Expense } from '../models/expense.model';
+import { Observable, of } from 'rxjs';
 
 
 @Injectable({
@@ -68,6 +69,7 @@ export class ManagementService {
       }
     });
   }
+  
 
   // **Clients**
   async addClient(client: Client) {
@@ -123,17 +125,22 @@ export class ManagementService {
     }
   }
 
-  // **Ventes**
-  async addSale(sale: Sale) {
+  // Ventes
+  async addSale(sale: Sale): Promise<string> {
     return runInInjectionContext(this.injector, async () => {
       try {
-        const saleCollection = collection(this.firestore, 'sales'); // Référence à la collection 'sales'
-        const saleRef = await addDoc(saleCollection, sale); // Ajouter un document avec un ID auto-généré
-        console.log('Vente ajoutée avec succès, ID :', saleRef.id); // Log l'ID du document
-        return saleRef.id; // Retourner l'ID du document
+        if (!sale.saleNumber) {
+          throw new Error('Le numéro de vente est requis');
+        }
+  
+        const saleRef = doc(this.firestore, 'sales', sale.saleNumber);
+        await setDoc(saleRef, sale);
+        
+        console.log('Vente ajoutée avec succès, Numéro :', sale.saleNumber);
+        return sale.saleNumber;
       } catch (error) {
-        console.error('Erreur lors de l\'ajout de la vente :', error); // Log en cas d'erreur
-        throw error; // Propager l'erreur
+        console.error('Erreur lors de l\'ajout de la vente :', error);
+        throw error;
       }
     });
   }
@@ -148,6 +155,32 @@ export class ManagementService {
       } catch (error) {
         console.error('Erreur lors de la récupération des ventes :', error); // Log en cas d'erreur
         throw error; // Propager l'erreur
+      }
+    });
+  }
+
+  async deleteSale(saleNumber: string): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      try {
+        const saleRef = doc(this.firestore, 'sales', saleNumber);
+        await deleteDoc(saleRef);
+        console.log('Vente supprimée avec succès');
+      } catch (error) {
+        console.error('Erreur lors de la suppression de la vente:', error);
+        throw error;
+      }
+    });
+  }
+  
+  async updateSale(sale: Sale): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      try {
+        const saleRef = doc(this.firestore, 'sales', sale.saleNumber);
+        await setDoc(saleRef, sale);
+        console.log('Vente mise à jour avec succès');
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour de la vente:', error);
+        throw error;
       }
     });
   }
